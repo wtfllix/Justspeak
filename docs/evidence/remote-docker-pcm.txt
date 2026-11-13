@@ -1,0 +1,1 @@
+Synthetic PCM transport passed: A received 50 nonzero frames, B received 50. NOT real voice acceptance.

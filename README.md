@@ -41,6 +41,8 @@ curl --fail http://127.0.0.1:3001/healthz
 
 本机 API 是 `http://127.0.0.1:3001`，媒体是 `ws://127.0.0.1:7880`。host 网络配置面向 Linux VPS，未验证 Docker Desktop。API 健康检查只证明 Token API 响应，不证明音频可用。LiveKit 健康检查验证 HTTP 端点，不替代双机测试。
 
+内网受控 PoC 暂无域名时，可按 [Windows SSH 隧道规程](docs/DEPLOY-SSH-POC.md) 连接；它要求两台测试电脑能直达服务器媒体地址，不替代公网部署。
+
 两台 Windows 连接远程 Linux 时，准备两个域名与受信任证书。将 `deploy/.env` 改为：
 
 ```dotenv

@@ -1,0 +1,7 @@
+2026-11-13T14:18:51Z
+Docker 29.6.1
+Docker Compose version v5.2.0
+NAME                   IMAGE                                                                                                     COMMAND                  SERVICE   CREATED              STATUS                        PORTS
+xxspeak-m0-api-1       xxspeak-m0-api                                                                                            "docker-entrypoint.s…"   api       4 minutes ago        Up 4 minutes (healthy)
+xxspeak-m0-livekit-1   livekit/livekit-server:v1.13.11@sha256:25cd902de7cacbd5f1f779f6a6ac1eae20ba8f56b0935934ce6b0ab80d1e3d20   "/bin/sh -ec 'printf…"   livekit   About a minute ago   Up About a minute (healthy)
+{"status":"ok","scope":"token-api-only"}

@@ -8,10 +8,16 @@ services:
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Run node scripts/init-deploy.mjs}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Missing secret}
       USE_EXTERNAL_IP: ${USE_EXTERNAL_IP:-false}
+      LIVEKIT_NODE_IP: ${LIVEKIT_NODE_IP:-}
+      LIVEKIT_INTERFACE: ${LIVEKIT_INTERFACE:-}
     entrypoint: ["/bin/sh", "-ec"]
     command:
       - |
-        printf 'port: 7880\nbind_addresses: ["127.0.0.1"]\nrtc:\n  tcp_port: 7881\n  udp_port: 7882\n  use_external_ip: %s\nkeys:\n  "%s": "%s"\n' "$$USE_EXTERNAL_IP" "$$LIVEKIT_API_KEY" "$$LIVEKIT_API_SECRET" > /tmp/livekit.yaml
+        printf 'port: 7880\nbind_addresses: ["127.0.0.1"]\nrtc:\n  tcp_port: 7881\n  udp_port: 7882\n  use_external_ip: %s\n  node_ip: "%s"\n' "$$USE_EXTERNAL_IP" "$$LIVEKIT_NODE_IP" > /tmp/livekit.yaml
+        if [ -n "$$LIVEKIT_INTERFACE" ]; then
+          printf '  interfaces:\n    includes: ["%s"]\n' "$$LIVEKIT_INTERFACE" >> /tmp/livekit.yaml
+        fi
+        printf 'keys:\n  "%s": "%s"\n' "$$LIVEKIT_API_KEY" "$$LIVEKIT_API_SECRET" >> /tmp/livekit.yaml
         exec /livekit-server --config /tmp/livekit.yaml
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:7880/"]

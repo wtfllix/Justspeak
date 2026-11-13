@@ -56,3 +56,16 @@
 先完成 Windows 构建、真实音频设备与双机一小时测试，补齐 M0 原生路径/AEC/PCM 决策及性能基线，再决定是否退出 M0。生产音频路径暂选 PlatformAudio；PCM 接入可行性已有 Linux 传输证据，Windows 设备与处理参考仍需确认。
 
 M1：多频道事务、D01 双击加入、本地身份/挑战签名、D03 上次频道回退、D04 全局 PTT/VAD、个人音量与托盘。M2：Registry/服务器 ID/书签/密码。M3：完整设备热插拔、输出选择、试听、RNNoise 与 AEC 验证。M4/M5 安全管理、撤权与正式发布不提前纳入本轮。
+
+
+## 后续验证：Windows CI 与 Linux Docker 部署
+
+Windows 构建在 [运行 43439185786](https://github.com/wtfllix/Justspeak/actions/runs/43439185786) 已全部通过（提交 2e3056d）：JavaScript 检查、Windows 完整 Cargo workspace check 和 Tauri Release build --no-bundle。原先两个带 State 引用的异步命令改为返回 Result；Windows x64 CRT 按 LiveKit 上游配置统一为静态。证据见 evidence/windows-ci.json。此结果更新上文“Windows exe 编译未验证”的历史状态，仍不证明实际 Windows 音频设备或双机通话通过。
+
+经用户授权，在另一台 Debian 13 服务器通过 Docker 29.6.1 / Compose 5.2.0 部署 Fastify 与 LiveKit 1.13.11，项目目录 /opt/xxspeak，Compose 项目名 xxspeak-m0。镜像构建成功，两个容器均 healthy；API/信令仅监听回环。凭据在服务器 deploy/.env，权限 600，未复制到客户端或版本库。证据见 evidence/remote-compose-health.txt。
+
+多网卡主机初次自动选择了 Docker 网桥媒体地址。仅指定 NODE_IP 后的首轮跨机 PCM 仍因 ICE 超时失败；主机间 TCP/UDP 基础可达性检查成功。进一步通过 LIVEKIT_INTERFACE 将 ICE 绑定到实际内网网卡后，远端双向合成 PCM 探针通过，两端各收到 50 帧非零解码音频（evidence/remote-docker-pcm.txt）。新增可选 LIVEKIT_NODE_IP 与 LIVEKIT_INTERFACE 配置支持此部署。失败记录未计为通过。
+
+这项测试是两个 Rust Room 到远端 Docker SFU 的合成音频链路，API/信令经 SSH 隧道，媒体经真实内网 UDP；并非两台 Windows 电脑的真人麦克风/扬声器通话。Windows 用户截图只确认窗口可启动与 HyperX 设备可枚举。两台 Windows 连续一小时、设备切换/重连、CPU/私有工作集和端到端延迟仍未测试，M0 退出门槛仍未满足。
+
+尚未配置公网域名/TLS/TURN。当前受控内网测试按 DEPLOY-SSH-POC.md 使用 SSH 转发；每台测试电脑必须具备管理员提供的 SSH 登录方式，并能到达服务器的 ICE 地址。服务端出现 UDP buffer 生产建议值警告，未更改共享宿主机内核参数。
