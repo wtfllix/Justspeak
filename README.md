@@ -19,6 +19,8 @@ npm run desktop
 npm run tauri -w @xxspeak/desktop -- build --no-bundle
 ```
 
+也可在 GitHub Actions 的 `check` 成功运行页面下载 `xxspeak-m0-windows-x64` 产物。解压后运行 `xxspeak.exe`；无需在虚拟机安装 Node.js/Rust，但必须有 WebView2 Runtime。产物含 EXE、校验值、源码提交和[使用说明](docs/WINDOWS-PORTABLE.md)，保留 14 天。Windows job 会检查 Release 进程能存活 5 秒，这不替代真实音频/持续通话测试。
+
 程序位于 `target/release/xxspeak-desktop.exe`。`npm run dev` 仅网页布局预览，无原生音频，界面会提示。Linux 需额外安装 Tauri 的 WebKitGTK 4.1/GTK3 开发库和 LiveKit 原生构建依赖；本轮未验证 Linux 桌面运行。
 
 Windows x64 的 `.cargo/config.toml` 按 LiveKit 上游配置启用 `+crt-static`，让 Rust/C++ 桥接代码与预编译 libwebrtc 使用一致的 MSVC 运行库。遇到 `LNK2038 RuntimeLibrary MT_StaticRelease/MD_DynamicRelease` 时，先拉取包含此配置的最新代码，并检查是否设置了覆盖项目配置的 `RUSTFLAGS` 或 `CARGO_ENCODED_RUSTFLAGS`。不要通过忽略链接冲突来构建。

@@ -1,5 +1,8 @@
 name: check
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 jobs:
   javascript:
     runs-on: ubuntu-latest
@@ -22,3 +25,34 @@ jobs:
       - run: npm ci
       - run: cargo check --locked --workspace
       - run: npm run tauri -w @xxspeak/desktop -- build --no-bundle
+      - name: Prepare Windows portable artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/windows-x64 | Out-Null
+          Copy-Item target/release/xxspeak-desktop.exe dist/windows-x64/xxspeak.exe
+          Copy-Item docs/WINDOWS-PORTABLE.md dist/windows-x64/README.md
+          $artifactHash = (Get-FileHash dist/windows-x64/xxspeak.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$artifactHash  xxspeak.exe" | Set-Content dist/windows-x64/SHA256SUMS.txt -Encoding ascii
+          $env:GITHUB_SHA | Set-Content dist/windows-x64/SOURCE_COMMIT.txt -Encoding ascii
+      - name: Check Windows executable stays running
+        shell: pwsh
+        run: |
+          $clientProcess = Start-Process -FilePath (Resolve-Path dist/windows-x64/xxspeak.exe) -PassThru
+          try {
+            Start-Sleep -Seconds 5
+            $clientProcess.Refresh()
+            if ($clientProcess.HasExited) {
+              throw "Windows executable exited during startup (code $($clientProcess.ExitCode))"
+            }
+          } finally {
+            if (-not $clientProcess.HasExited) {
+              Stop-Process -Id $clientProcess.Id -Force
+            }
+          }
+      - name: Upload Windows portable artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: xxspeak-m0-windows-x64
+          path: dist/windows-x64/
+          if-no-files-found: error
+          retention-days: 14
