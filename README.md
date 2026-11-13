@@ -21,6 +21,8 @@ npm run tauri -w @xxspeak/desktop -- build --no-bundle
 
 程序位于 `target/release/xxspeak-desktop.exe`。`npm run dev` 仅网页布局预览，无原生音频，界面会提示。Linux 需额外安装 Tauri 的 WebKitGTK 4.1/GTK3 开发库和 LiveKit 原生构建依赖；本轮未验证 Linux 桌面运行。
 
+Windows x64 的 `.cargo/config.toml` 按 LiveKit 上游配置启用 `+crt-static`，让 Rust/C++ 桥接代码与预编译 libwebrtc 使用一致的 MSVC 运行库。遇到 `LNK2038 RuntimeLibrary MT_StaticRelease/MD_DynamicRelease` 时，先拉取包含此配置的最新代码，并检查是否设置了覆盖项目配置的 `RUSTFLAGS` 或 `CARGO_ENCODED_RUSTFLAGS`。不要通过忽略链接冲突来构建。
+
 连接时展开设置、刷新并选择真实麦克风，填昵称、管理员给的 Token API 地址和内测连接码，点“仅本次连接”。两端都要点“开启麦克风”。连接码只在内存使用，成功后清空；切换麦克风或网络重连后保持静音，手动重新开麦。远端音频自动订阅并经原生播放设备播放；M0 选择列表中的第一个输出设备。断开后可再次连接，需重新输入连接码。连接取消最长等待在途网络超时，但迟到结果不得继续发布。
 
 ## 自托管服务（Linux Docker Engine + Compose v2）

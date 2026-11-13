@@ -1,0 +1,4 @@
+# Match the CRT used by LiveKit's prebuilt Windows libwebrtc library.
+# Upstream: https://github.com/livekit/rust-sdks/blob/main/.cargo/config.toml
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
