@@ -1,0 +1,57 @@
+# Linux host networking preserves ICE candidates. Not a Docker Desktop configuration.
+services:
+  livekit:
+    image: livekit/livekit-server:v1.13.11@sha256:25cd902de7cacbd5f1f779f6a6ac1eae20ba8f56b0935934ce6b0ab80d1e3d20
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Run node scripts/init-deploy.mjs}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Missing secret}
+      USE_EXTERNAL_IP: ${USE_EXTERNAL_IP:-false}
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        printf 'port: 7880\nbind_addresses: ["127.0.0.1"]\nrtc:\n  tcp_port: 7881\n  udp_port: 7882\n  use_external_ip: %s\nkeys:\n  "%s": "%s"\n' "$$USE_EXTERNAL_IP" "$$LIVEKIT_API_KEY" "$$LIVEKIT_API_SECRET" > /tmp/livekit.yaml
+        exec /livekit-server --config /tmp/livekit.yaml
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:7880/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Missing key}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Missing secret}
+      POC_JOIN_CODE: ${POC_JOIN_CODE:?Missing join code}
+      LIVEKIT_URL: ${LIVEKIT_URL:?Missing media URL}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  proxy:
+    profiles: [tls]
+    image: caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      API_DOMAIN: ${API_DOMAIN}
+      MEDIA_DOMAIN: ${MEDIA_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+volumes:
+  caddy_data:
+  caddy_config:

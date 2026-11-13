@@ -1,0 +1,14 @@
+  pkg-config output:
+    Package gdk-3.0 was not found in the pkg-config search path.
+    Perhaps you should add the directory containing `gdk-3.0.pc'
+    to the PKG_CONFIG_PATH environment variable
+    Package 'gdk-3.0' not found
+    Package 'gdk-3.0' not found
+
+  The system library `gdk-3.0` required by crate `gdk-sys` was not found.
+  The file `gdk-3.0.pc` needs to be installed and the PKG_CONFIG_PATH environment variable must contain its parent directory.
+  The PKG_CONFIG_PATH environment variable is not set.
+
+  HINT: if you have installed the library, try setting PKG_CONFIG_PATH to the directory containing `gdk-3.0.pc`.
+
+warning: build failed, waiting for other jobs to finish...

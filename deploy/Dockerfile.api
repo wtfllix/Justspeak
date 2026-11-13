@@ -1,0 +1,10 @@
+FROM node:24.16.0-alpine3.23@sha256:2bdb65ed1dab192432bc31c95f94155ca5ad7fc1392fb7eb7526ab682fa5bf14
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY apps/voice-server/package.json apps/voice-server/package.json
+COPY apps/desktop/package.json apps/desktop/package.json
+RUN npm ci --omit=dev --workspace=@xxspeak/voice-server --ignore-scripts && npm cache clean --force
+COPY apps/voice-server/src apps/voice-server/src
+USER node
+ENV HOST=127.0.0.1 PORT=3001
+CMD ["node", "apps/voice-server/src/index.js"]

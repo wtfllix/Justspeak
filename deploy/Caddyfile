@@ -1,0 +1,21 @@
+{
+ email {$ACME_EMAIL}
+}
+{$API_DOMAIN} {
+ @allowed path /healthz /v1/poc/token
+ handle @allowed {
+  reverse_proxy 127.0.0.1:3001
+ }
+ handle {
+  respond 404
+ }
+}
+{$MEDIA_DOMAIN} {
+ @signaling path /rtc /rtc/*
+ handle @signaling {
+  reverse_proxy 127.0.0.1:7880
+ }
+ handle {
+  respond 404
+ }
+}

@@ -1,0 +1,1 @@
+{"name":"xxspeak","private":true,"workspaces":["apps/*"],"scripts":{"dev":"npm run dev -w @xxspeak/desktop","desktop":"npm run tauri -w @xxspeak/desktop -- dev","build":"npm run build --workspaces --if-present","check":"npm run check --workspaces --if-present","test":"npm test -w @xxspeak/voice-server","server":"npm start -w @xxspeak/voice-server"},"engines":{"node":">=22"}}

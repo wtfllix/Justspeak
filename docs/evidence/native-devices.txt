@@ -1,0 +1,6 @@
+   Compiling voice-core v0.0.1 (/home/lx/Justspeak/crates/voice-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.94s
+     Running `target/debug/examples/devices`
+Native recording devices: 2
+index:0: default: RDP Source
+index:1: RDP Source

@@ -1,0 +1,7 @@
+    Checking link-cplusplus v1.0.12
+   Compiling webrtc-sys v0.3.53
+    Checking cxx v1.0.205
+    Checking libwebrtc v0.4.0
+    Checking livekit v0.10.1
+    Checking voice-core v0.0.1 (/home/lx/Justspeak/crates/voice-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 15.79s

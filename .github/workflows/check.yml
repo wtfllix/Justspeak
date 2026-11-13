@@ -1,0 +1,24 @@
+name: check
+on: [push, pull_request]
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.16.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run check && npm test && npm run build
+  windows-native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.16.0'
+      - uses: dtolnay/rust-toolchain@1.100.0
+      - run: npm ci
+      - run: cargo check --locked --workspace
+      - run: npm run tauri -w @xxspeak/desktop -- build --no-bundle
