@@ -17,8 +17,9 @@ async fn connect(
         .await
 }
 #[tauri::command]
-async fn disconnect(core: State<'_, VoiceCore>) {
-    core.disconnect().await
+async fn disconnect(core: State<'_, VoiceCore>) -> Result<(), String> {
+    core.disconnect().await;
+    Ok(())
 }
 #[tauri::command]
 async fn set_muted(core: State<'_, VoiceCore>, muted: bool) -> Result<(), String> {
@@ -29,8 +30,8 @@ async fn select_microphone(core: State<'_, VoiceCore>, id: String) -> Result<(),
     core.select_microphone(id).await
 }
 #[tauri::command]
-async fn snapshot(core: State<'_, VoiceCore>) -> Snapshot {
-    core.snapshot().await
+async fn snapshot(core: State<'_, VoiceCore>) -> Result<Snapshot, String> {
+    Ok(core.snapshot().await)
 }
 fn main() {
     tauri::Builder::default()
