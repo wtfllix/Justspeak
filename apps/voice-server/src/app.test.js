@@ -15,6 +15,20 @@ test('restricted signed token, unique identity, no secret in response', async t 
 test('reject missing credentials, bad code and invalid nickname',async t=>{const app=await buildApp(config);t.after(()=>app.close());
  for(const payload of [{},{nickname:'x',joinCode:'bad'},{nickname:' ',joinCode:config.joinCode},{nickname:'x'.repeat(33),joinCode:config.joinCode}]){const r=await app.inject({method:'POST',url:'/v1/poc/token',payload});assert.ok([400,401].includes(r.statusCode));assert.ok(!r.body.includes(config.secret));}
 });
+test('join code tolerates surrounding copy whitespace but rejects changed content', async t => {
+ const app = await buildApp(config); t.after(()=>app.close());
+ for (const joinCode of [` ${config.joinCode} `, `\r\n${config.joinCode}\r\n`]) {
+  const response = await app.inject({method:'POST',url:'/v1/poc/token',payload:{nickname:'玩家',joinCode}});
+  assert.equal(response.statusCode,200);
+ }
+ for (const joinCode of [`POC_JOIN_CODE=${config.joinCode}`,`${config.joinCode.slice(0,5)} ${config.joinCode.slice(5)}`]) {
+  const response = await app.inject({method:'POST',url:'/v1/poc/token',payload:{nickname:'玩家',joinCode}});
+  assert.equal(response.statusCode,401);
+ }
+ const env = {LIVEKIT_API_KEY:config.apiKey,LIVEKIT_API_SECRET:config.secret,POC_JOIN_CODE:` ${config.joinCode}\r\n`,LIVEKIT_URL:config.url};
+ assert.equal(readConfig(env).joinCode,config.joinCode);
+ assert.throws(()=>readConfig({...env,POC_JOIN_CODE:` ${'x'.repeat(23)} `}));
+});
 test('room cannot be selected by client and issuance is rate limited',async t=>{const app=await buildApp(config);t.after(()=>app.close());
  const r=await app.inject({method:'POST',url:'/v1/poc/token',payload:{nickname:'x',joinCode:config.joinCode,room:'admin'}}); assert.equal(r.statusCode,400);
  let last;for(let i=0;i<21;i++)last=await app.inject({method:'POST',url:'/v1/poc/token',payload:{nickname:'x',joinCode:'bad'}});assert.equal(last.statusCode,429);
